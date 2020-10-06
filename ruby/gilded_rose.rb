@@ -1,55 +1,48 @@
 class GildedRose
-
   def initialize(items)
     @items = items
   end
 
-  def update_quality()
+  def update_quality
     @items.each do |item|
-      if item.name != "Aged Brie" and item.name != "Backstage passes to a TAFKAL80ETC concert"
-        if item.quality > 0
-          if item.name != "Sulfuras, Hand of Ragnaros"
-            item.quality = item.quality - 1
-          end
-        end
+      modifier = set_modifier(item.name, item.sell_in)
+
+      case item.name
+      when "Sulfuras, Hand of Ragnaros"
+        next
+      when "Aged Brie"
+        item.quality = adjust_quality(item.quality, 1, modifier)
+      when "Backstage passes to a TAFKAL80ETC concert"
+        item.quality = adjust_quality(item.quality, 1, modifier)
+        item.quality = 0 if item.sell_in <= 0
       else
-        if item.quality < 50
-          item.quality = item.quality + 1
-          if item.name == "Backstage passes to a TAFKAL80ETC concert"
-            if item.sell_in < 11
-              if item.quality < 50
-                item.quality = item.quality + 1
-              end
-            end
-            if item.sell_in < 6
-              if item.quality < 50
-                item.quality = item.quality + 1
-              end
-            end
-          end
-        end
+        item.quality = adjust_quality(item.quality, -1, modifier)
       end
-      if item.name != "Sulfuras, Hand of Ragnaros"
-        item.sell_in = item.sell_in - 1
-      end
-      if item.sell_in < 0
-        if item.name != "Aged Brie"
-          if item.name != "Backstage passes to a TAFKAL80ETC concert"
-            if item.quality > 0
-              if item.name != "Sulfuras, Hand of Ragnaros"
-                item.quality = item.quality - 1
-              end
-            end
-          else
-            item.quality = item.quality - item.quality
-          end
-        else
-          if item.quality < 50
-            item.quality = item.quality + 1
-          end
-        end
-      end
+      item.sell_in -= 1
     end
+  end
+
+  def adjust_quality(quality, increment, modifier)
+    new_quality = quality + increment*modifier
+    if new_quality > 50
+      return 50
+    elsif new_quality < 0
+      return 0
+    else
+      return new_quality
+    end
+  end
+
+  def set_modifier(name, sell_in)
+    modifier = 1
+    if name == "Backstage passes to a TAFKAL80ETC concert"
+      modifier = 2 if sell_in <= 10
+      modifier = 3 if sell_in <= 5
+    elsif name.split(" ")[0] == "Conjured"
+      modifier = 2
+    end
+    modifier *= 2 if sell_in <= 0
+    modifier
   end
 end
 
