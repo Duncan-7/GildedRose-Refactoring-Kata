@@ -7,14 +7,14 @@ class GildedRose
     @items.each do |item|
       modifier = set_modifier(item.name, item.sell_in)
 
-      case item.name
-      when "Sulfuras, Hand of Ragnaros"
+      case
+      when item.name.include?("Sulfuras")
         next
-      when "Aged Brie"
-        item.quality = adjust_quality(item.quality, 1, modifier)
-      when "Backstage passes to a TAFKAL80ETC concert"
+      when item.name.include?("Backstage passes")
         item.quality = adjust_quality(item.quality, 1, modifier)
         item.quality = 0 if item.sell_in <= 0
+      when item.name == "Aged Brie"
+        item.quality = adjust_quality(item.quality, 1, modifier)
       else
         item.quality = adjust_quality(item.quality, -1, modifier)
       end
@@ -35,10 +35,10 @@ class GildedRose
 
   def set_modifier(name, sell_in)
     modifier = 1
-    if name == "Backstage passes to a TAFKAL80ETC concert"
+    if name.include?("Backstage passes")
       modifier = 2 if sell_in <= 10
       modifier = 3 if sell_in <= 5
-    elsif name.split(" ")[0] == "Conjured"
+    elsif name.start_with?("Conjured")
       modifier = 2
     end
     modifier *= 2 if sell_in <= 0
